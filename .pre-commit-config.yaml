@@ -1,0 +1,92 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: check-added-large-files
+      - id: check-ast
+      - id: check-byte-order-marker
+      - id: check-builtin-literals
+      - id: check-case-conflict
+      - id: check-docstring-first
+      - id: check-json
+      - id: check-merge-conflict
+      - id: check-symlinks
+      - id: check-toml
+      - id: check-yaml
+      - id: debug-statements
+      - id: detect-aws-credentials
+        args:
+          - --allow-missing-credentials
+      - id: detect-private-key
+      - id: double-quote-string-fixer
+      - id: end-of-file-fixer
+      - id: mixed-line-ending
+      - id: pretty-format-json
+        args:
+          - --autofix
+      - id: requirements-txt-fixer
+      - id: trailing-whitespace
+  - repo: https://github.com/pycqa/bandit
+    rev: 1.7.4
+    hooks:
+      - id: bandit
+        exclude: |
+          (?x)(
+              ^app_init/|
+              ^docs/|
+              ^tcex/testing/|
+              ^tests/
+          )
+  - repo: https://github.com/psf/black
+    rev: 23.1.0
+    hooks:
+      - id: black
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.2.2
+    hooks:
+      - id: codespell
+  - repo: https://github.com/pre-commit/mirrors-isort
+    rev: v5.10.1
+    hooks:
+      - id: isort
+        exclude: |
+          (?x)(
+              ^app_init/
+          )
+  - repo: https://github.com/pycqa/pydocstyle
+    rev: 6.3.0
+    hooks:
+      - id: pydocstyle
+        args:
+          - --ignore=D104,D202,D203,D213,D300,D301,D400,D402,D406,D407,D413,D415
+        exclude: |
+          (?x)(
+              ^tcex/threat_intelligence/|
+              ^tests/
+          )
+  - repo: https://github.com/asottile/pyupgrade
+    rev: v3.3.1
+    hooks:
+      - id: pyupgrade
+        args:
+          - --py311-plus
+  - repo: https://github.com/yunojuno/pre-commit-xenon
+    rev: v0.1
+    hooks:
+      - id: xenon
+        args: ['--max-average=B', '-e=tests*']
+  - repo: local
+    hooks:
+      - id: pyright
+        entry: pyright
+        language: system
+        name: pyright
+        types: [python]
+  - repo: local
+    hooks:
+      - id: pylint
+        entry: pylint
+        language: system
+        name: pylint
+        types: [python]
+        args: ['--jobs=2']
