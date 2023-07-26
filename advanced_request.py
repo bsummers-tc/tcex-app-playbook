@@ -45,7 +45,7 @@ class AdvancedRequest:
 
         # properties
         self.allow_redirects: bool = True
-        self.data: dict | str | None = None
+        self.data: bytes | dict | str | None = None
         self.headers: dict = {}
         self.log = _logger
         self.max_mb: int = 500
@@ -58,7 +58,7 @@ class AdvancedRequest:
         if self.data is not None:
             # INT-1386
             try:
-                self.data = self.data.encode('utf-8')
+                self.data = self.data.encode('utf-8')  # type: ignore
             except AttributeError:
                 pass  # Binary Data
 
