@@ -576,11 +576,13 @@ class PlaybookCreate:
         value: BaseModel
         | bytes
         | dict
+        | int
         | str
-        | list[BaseModel]
-        | list[bytes]
-        | list[dict]
-        | list[str]
+        | list
+        | list[BaseModel | None]
+        | list[bytes | None]
+        | list[dict | None]
+        | list[str | None]
         | None,
         variable_type: str | None = None,
     ) -> int | None:

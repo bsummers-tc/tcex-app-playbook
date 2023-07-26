@@ -523,7 +523,8 @@ class PlaybookRead:
         _data: list[str] = self._deserialize_data(data)
 
         # return array of StringVariables
-        return [StringVariable(self._coerce_string_value(d)) for d in _data]
+        # return [StringVariable(self._coerce_string_value(d)) for d in _data]
+        return [d if d is None else StringVariable(self._coerce_string_value(d)) for d in _data]
 
     def tc_batch(self, key: str) -> dict | None:
         """Read the value from key value store.
