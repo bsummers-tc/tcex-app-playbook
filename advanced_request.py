@@ -80,7 +80,7 @@ class AdvancedRequest:
         }]
         """
         for header_data in self.model.tc_adv_req_headers or []:
-            value = self.playbook.read.variable(header_data['value'])
+            value = header_data['value']
             self.headers[str(header_data.get('key'))] = str(value)
 
     def configure_params(self):
@@ -93,7 +93,7 @@ class AdvancedRequest:
         """
         for param_data in self.model.tc_adv_req_params or []:
             param = param_data.get('key')
-            values = self.playbook.read.variable(param_data['value'])
+            value = param_data['value']
             if not isinstance(values, list):
                 values = [values]
             for value in values:
