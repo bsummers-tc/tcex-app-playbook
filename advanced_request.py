@@ -93,7 +93,7 @@ class AdvancedRequest:
         """
         for param_data in self.model.tc_adv_req_params or []:
             param = param_data.get('key')
-            value = param_data['value']
+            values = param_data['value']
             if not isinstance(values, list):
                 values = [values]
             for value in values:
