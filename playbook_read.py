@@ -8,6 +8,7 @@ from collections import OrderedDict
 from typing import Any
 
 from ...app.key_value_store.key_value_store import KeyValueStore
+from ...input.field_type.sensitive import Sensitive
 from ...registry import registry
 from ...util.util import Util
 from ...util.variable import BinaryVariable, StringVariable
@@ -44,7 +45,7 @@ class PlaybookRead:
             )
 
     @staticmethod
-    def _coerce_string_value(value: bool | float | int | str) -> str:
+    def _coerce_string_value(value: bool | float | int | str | Sensitive) -> str | Sensitive:
         """Return a string value from an bool or int."""
         # coerce bool before int as python says a bool is an int
         if isinstance(value, bool):
@@ -160,7 +161,7 @@ class PlaybookRead:
         string = re.sub(r'\\\\s', r'\\s', string)
         return string
 
-    def _read_embedded(self, value: str) -> str:
+    def _read_embedded(self, value: str) -> Sensitive | str:
         r"""Read method for "embedded" variables.
 
         .. Note:: The ``read()`` method will automatically determine if the input is a variable or
@@ -212,6 +213,7 @@ class PlaybookRead:
         if value is None:  # pragma: no cover
             return value
 
+        value_ = value
         for match in re.finditer(self.util.variable_expansion_pattern, str(value)):
             variable = match.group(0)  # the full variable pattern
             v = None
@@ -237,10 +239,20 @@ class PlaybookRead:
             # value.replace was chosen over re.sub due to an issue encountered while testing an app.
             # re.sub will handle escaped characters like \t, value.replace would not handle these
             # scenarios.
-            if isinstance(v, str):
-                value = value.replace(variable, v)
+            if isinstance(v, Sensitive) and value_ == variable:
+                # handle when tc variables are embedded in a a playbook variable and the
+                # type is KeyChain. a Sensitive value needs to be returned so that the
+                # developer can control the output of the data, protecting the value.
+                # this is done when the variable is an exact match to the value.
+                value_ = v
+            elif isinstance(v, Sensitive):
+                # alternate to above this handles when tc variables is embedded in a string.
+                # this is NOT recommended, but still supported through this method.
+                value_ = value_.replace(variable, v.value)
+            elif isinstance(v, str):
+                value_ = value_.replace(variable, v)
 
-        return StringVariable(value)
+        return value_
 
     @staticmethod
     def _to_array(value: list | str | None) -> list:
@@ -461,7 +473,7 @@ class PlaybookRead:
         self,
         key: str,
         resolve_embedded: bool = True,
-    ) -> StringVariable | None:
+    ) -> Sensitive | str | None:
         """Read the value from key value store.
 
         The string write method serializes the string before writing to the key value store.
@@ -493,7 +505,7 @@ class PlaybookRead:
             data = self._read_embedded(data)
 
         # coerce data back to string, since technically TC doesn't support bool, int, etc
-        return StringVariable(self._coerce_string_value(data))
+        return self._coerce_string_value(data)
 
     def string_array(self, key: str) -> list[StringVariable] | None:
         """Read the value from key value store.
@@ -606,7 +618,9 @@ class PlaybookRead:
         # deserialize the data
         return self._deserialize_data(data)
 
-    def variable(self, key: str | None, array: bool = False) -> bytes | dict | list | str | None:
+    def variable(
+        self, key: str | None, array: bool = False
+    ) -> bytes | dict | list | str | Sensitive | None:
         """Read method of CRUD operation for working with KeyValue DB.
 
         This method will automatically check to see if a single variable is passed
