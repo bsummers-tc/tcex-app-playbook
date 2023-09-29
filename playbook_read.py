@@ -245,11 +245,11 @@ class PlaybookRead:
                 # developer can control the output of the data, protecting the value.
                 # this is done when the variable is an exact match to the value.
                 value_ = v
-            elif isinstance(v, Sensitive):
+            elif isinstance(value_, str) and isinstance(v, Sensitive):
                 # alternate to above this handles when tc variables is embedded in a string.
                 # this is NOT recommended, but still supported through this method.
                 value_ = value_.replace(variable, v.value)
-            elif isinstance(v, str):
+            elif isinstance(value_, str) and isinstance(v, str):
                 value_ = value_.replace(variable, v)
 
         return value_
