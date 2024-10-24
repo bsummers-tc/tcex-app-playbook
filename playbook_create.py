@@ -1,4 +1,5 @@
 """TcEx Framework Module"""
+
 # standard library
 import base64
 import json
@@ -199,14 +200,9 @@ class PlaybookCreate:
     def any(
         self,
         key: str,
-        value: BaseModel
-        | bytes
-        | dict
-        | str
-        | list[BaseModel]
-        | list[bytes]
-        | list[dict]
-        | list[str],
+        value: (
+            BaseModel | bytes | dict | str | list[BaseModel] | list[bytes] | list[dict] | list[str]
+        ),
         validate: bool = True,
         variable_type: str | None = None,
         when_requested: bool = True,
@@ -573,17 +569,19 @@ class PlaybookCreate:
     def variable(
         self,
         key: str,
-        value: BaseModel
-        | bytes
-        | dict
-        | int
-        | str
-        | list
-        | list[BaseModel | None]
-        | list[bytes | None]
-        | list[dict | None]
-        | list[str | None]
-        | None,
+        value: (
+            BaseModel
+            | bytes
+            | dict
+            | int
+            | str
+            | list
+            | list[BaseModel | None]
+            | list[bytes | None]
+            | list[dict | None]
+            | list[str | None]
+            | None
+        ),
         variable_type: str | None = None,
     ) -> int | None:
         """Alias for any method of CRUD operation for working with KeyValue DB.
