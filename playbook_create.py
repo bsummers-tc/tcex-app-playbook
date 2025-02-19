@@ -411,7 +411,7 @@ class PlaybookCreate:
 
         # validation only needs to check str because value was coerced
         if validate and not isinstance(value, str):
-            raise RuntimeError('Invalid data provided for String.')
+            raise RuntimeError(f'Invalid data provided for String ({value}).')
 
         return self._create_data(variable, self._serialize_data(value))
 
