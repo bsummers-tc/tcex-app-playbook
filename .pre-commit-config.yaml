@@ -32,15 +32,8 @@ repos:
       - id: bandit
         exclude: |
           (?x)(
-              ^app_init/|
-              ^docs/|
-              ^tcex/testing/|
               ^tests/
           )
-  - repo: https://github.com/psf/black
-    rev: 24.10.0
-    hooks:
-      - id: black
   - repo: https://github.com/codespell-project/codespell
     rev: v2.3.0
     hooks:
@@ -53,40 +46,30 @@ repos:
           (?x)(
               ^app_init/
           )
-  - repo: https://github.com/pycqa/pydocstyle
-    rev: 6.3.0
-    hooks:
-      - id: pydocstyle
-        args:
-          - --ignore=D104,D202,D203,D213,D300,D301,D400,D402,D406,D407,D413,D415
-        exclude: |
-          (?x)(
-              ^tcex/threat_intelligence/|
-              ^tests/
-          )
   - repo: https://github.com/asottile/pyupgrade
     rev: v3.19.0
     hooks:
       - id: pyupgrade
         args:
           - --py311-plus
-  - repo: https://github.com/yunojuno/pre-commit-xenon
-    rev: v0.1
-    hooks:
-      - id: xenon
-        args: ['--max-average=B', '-e=tests*']
   - repo: local
     hooks:
       - id: pyright
         entry: pyright
         language: system
         name: pyright
-        types: [python]
-  - repo: local
+        types:
+          - python
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.9.7
     hooks:
-      - id: pylint
-        entry: pylint
-        language: system
-        name: pylint
-        types: [python]
-        args: ['--jobs=2']
+      - id: ruff
+        args:
+          - --fix
+        types_or:
+          - python
+          - pyi
+      - id: ruff-format
+        types_or:
+          - python
+          - pyi

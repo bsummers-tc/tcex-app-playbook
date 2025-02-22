@@ -4,7 +4,7 @@
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from ..app.playbook.playbook import Playbook  # type: ignore # pylint: disable=import-error
+    from ..app.playbook.playbook import Playbook  # type: ignore
 
 
 class PlaybookOutput(dict):

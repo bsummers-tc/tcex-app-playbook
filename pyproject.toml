@@ -1,10 +1,8 @@
-[tool.black]
-line-length = 100
-skip-string-normalization = true
-
 [tool.codespell]
+# https://streetsidesoftware.com/vscode-spell-checker/
+
 # ignore-words-list=
-skip = "*.history,*local"
+skip = "*.cspell*,*.history,*local,uv.lock"
 
 [tool.isort]
 dedup_headings = false
@@ -18,8 +16,66 @@ known_third_party = ""
 line_length = 100
 profile = "black"
 
-[tool.pydocstyle]
+[tool.pyright]
+# https://github.com/microsoft/pyright/blob/main/docs/configuration.md#sample-pyprojecttoml-file
+
+exclude = [
+  "**/.history",
+  "**/__pycache__",
+  "**/local-*",
+  "tcex/api/tc/v2",
+  "tests",
+]
+pythonPlatform = "Linux"
+pythonVersion = "3.11"
+reportIncompatibleMethodOverride = false
+reportIncompatibleVariableOverride = false
+reportPrivateImportUsage = false
+
+[tool.pytest.ini_options]
+filterwarnings = []
+junit_family = "xunit2"
+testpaths = [
+  "tests",
+]
+
+[tool.ruff]
+# https://docs.astral.sh/ruff/
+
+# exclude additional directories, outside of .gitignore.
+exclude = [
+  "tests",
+]
+
+# set line length to match black
+line-length = 100
+
+# set the python target
+target-version = "py311"
+
+[tool.ruff.format]
+# https://docs.astral.sh/ruff/formatter/
+
+docstring-code-format = true
+docstring-code-line-length = 60
+indent-style = "space"
+line-ending = "auto"
+quote-style = "single"
+skip-magic-trailing-comma = false
+
+[tool.ruff.lint]
+# https://docs.astral.sh/ruff/linter/
+
+# control "--fix" behavior.
+# fixable = []
+# unfixable = []
+
+# https://beta.ruff.rs/docs/configuration/#error-suppression
 ignore = [
+  "B008", # Do not perform function call ... in argument defaults; instead, perform ...
+  "B011", # do not call assert False since python -O removes these calls
+  "BLE001", # Do not catch blind exception: ...
+  "C901", # ... is too complex
   "D202", # no blank lines allowed after function docstring
   "D203", # 1 blank line required before class docstring (found 0)
   "D213", # Multi-line docstring summary should start at the second line
@@ -28,37 +84,79 @@ ignore = [
   "D407", # Missing dashed underline after section ...
   "D413", # Missing blank line after last section ...
   "D415", # First line should end with a period, question mark, or exclamation point ...
+  "E402", # module level import not at top of file
+  "FBT001", # Boolean-typed positional argument in function definition
+  "FBT002", # Boolean default positional argument in function definition
+  "G004", # Logging statement uses f-string
+  "N818", # Exception name ... should be named with an Error suffix
+  "PGH003", # Use specific rule codes when ignoring type issues
+  "PLR0912", # Too many branches
+  "PLR0913", # Too many arguments in function definition
+  "PT006", # Wrong name(s) type in ..., expected ...
+  "TC001", # Move application import ... into a type-checking block
+  "TID252", # Prefer absolute imports over relative imports from parent modules
 ]
 
-[tool.pylint.messages_control]
-disable = [
-  "broad-exception-caught",
-  "duplicate-code",
-  "fixme",
-  "invalid-name",
-  "logging-fstring-interpolation",
-  "relative-beyond-top-level", # disable relative rule due to this project being a submodule
-  "too-few-public-methods",
-  "too-many-arguments",
-  "too-many-branches",
-  "too-many-instance-attributes",
-  "too-many-positional-arguments",
-  "too-many-public-methods",
+# control enabled plugins
+select = [
+  "A", # flake8-builtins
+  "ARG", # flake8-unused-arguments
+  "B", # flake8-bugbear
+  "BLE", # flake8-blind-except
+  "C", # flake8-comprehensions
+  "C4", # flake8-comprehensions
+  "C90", # mccabe
+  "D", # pydocstyle
+  "DJ", # flake8-django
+  "DTZ", # flake8-datetimez
+  "E", # pycodestyle
+  "W", # pycodestyle
+  "E", # pycodestyle
+  "EM", # flake8-errmsg
+  "EXE", # flake8-executable
+  "F", # Pyflakes
+  "FBT", # flake8-boolean-trap
+  "G", # flake8-logging-format
+  "I", # isort
+  "ICN", # flake8-import-conventions
+  "INP", # flake8-no-pep420
+  "ISC", # flake8-implicit-str-concat
+  "N", # pep8-naming
+  "NPY", # NumPy-specific
+  "PD", # pandas-vet
+  "PGH", # pygrep-hooks
+  "PIE", # flake8-pie
+  "PL", # Pylint
+  "PLC", # Convention
+  "PLE", # Error
+  "PLR", # Refactor
+  "PLW", # Warning
+  "PT", # flake8-pytest-style
+  "PTH", # flake8-use-pathlib
+  "PYI", # flake8-pyi
+  "RET", # flake8-return
+  "RSE", # flake8-raise
+  "RUF", # Ruff-specific
+  "SIM", # flake8-simplify
+  "SLF", # flake8-self
+  "T10", # flake8-debugger
+  "T20", # flake8-print
+  "TCH", # flake8-type-checking
+  "TID", # flake8-tidy-imports
+  "TRY", # tryceratops
+  "UP", # pyupgrade
+  "W", # pycodestyle
+  "YTT", # flake8-2020
 ]
-extension-pkg-whitelist = "pydantic"
 
-[tool.pyright]
-# https://github.com/microsoft/pyright/blob/main/docs/configuration.md#sample-pyprojecttoml-file
-exclude = [
-  "**/.history",
-  "**/__pycache__",
-]
-pythonPlatform = "Linux"
-pythonVersion = "3.11"
+# Other Options
+# "ANN", # flake8-annotations
+# "COM", # flake8-commas
+# "ERA", # eradicate
+# "S", # flake8-bandit
+# "Q", # flake8-quotes
 
-[tool.pytest.ini_options]
-filterwarnings = []
-junit_family = "xunit2"
-testpaths = [
-  "tests",
-]
+[tool.ruff.lint.pydocstyle]
+# https://docs.astral.sh/ruff/linter/
+
+convention = "google"

@@ -41,12 +41,11 @@ class PlaybookRead:
     def _check_variable_type(self, variable: str, type_: str):
         """Validate the correct type was passed to the method."""
         if self.util.get_playbook_variable_type(variable).lower() != type_.lower():
-            raise RuntimeError(
-                f'Invalid variable provided ({variable}), variable must be of type {type_}.'
-            )
+            ex_msg = f'Invalid variable provided ({variable}), variable must be of type {type_}.'
+            raise RuntimeError(ex_msg)
 
     @staticmethod
-    def _coerce_string_value(value: bool | float | int | str | Sensitive) -> str | Sensitive:
+    def _coerce_string_value(value: bool | float | str | Sensitive) -> str | Sensitive:
         """Return a string value from an bool or int."""
         # coerce bool before int as python says a bool is an int
         if isinstance(value, bool):
@@ -75,14 +74,15 @@ class PlaybookRead:
         try:
             return json.loads(value, object_pairs_hook=OrderedDict)
         except ValueError as ex:  # pragma: no cover
-            raise RuntimeError(f'Failed to JSON load data "{value}" ({ex}).') from ex
+            ex_msg = f'Failed to JSON load data "{value}" ({ex}).'
+            raise RuntimeError(ex_msg) from ex
 
     def _get_data(self, key: str) -> bytes | str | None:
         """Get the value from Redis if applicable."""
         try:
             return self.key_value_store.client.read(self.context, key.strip())
-        except RuntimeError as ex:
-            self.log.error(ex)
+        except RuntimeError:
+            self.log.exception('Failed to read data from key value store.')
         return None
 
     @staticmethod
@@ -91,7 +91,8 @@ class PlaybookRead:
         try:
             return json.loads(value, object_pairs_hook=OrderedDict)
         except ValueError as ex:  # pragma: no cover
-            raise RuntimeError(f'Failed to JSON load data "{value}" ({ex}).') from ex
+            ex_msg = f'Failed to JSON load data "{value}" ({ex}).'
+            raise RuntimeError(ex_msg) from ex
 
     def _null_key_check(self, key: Any) -> bool:
         """Return False if value is not null."""
@@ -159,8 +160,7 @@ class PlaybookRead:
         # replace "\s" with a space only for user input.
         # using '\\s' will prevent replacement.
         string = re.sub(r'(?<!\\)\\s', ' ', string)
-        string = re.sub(r'\\\\s', r'\\s', string)
-        return string
+        return re.sub(r'\\\\s', r'\\s', string)
 
     def _read_embedded(self, value: str) -> Sensitive | str:
         r"""Read method for "embedded" variables.
@@ -393,12 +393,13 @@ class PlaybookRead:
 
         values = []
         for d in _data:
-            if b64decode is True and isinstance(d, str):
-                d = BinaryVariable(base64.b64decode(d))
+            d_ = d
+            if b64decode is True and isinstance(d_, str):
+                d_ = BinaryVariable(base64.b64decode(d_))
                 if decode is True:
                     # allow developer to decided if they want bytes or str
-                    d = self._decode_binary(d)
-            values.append(d)
+                    d_ = self._decode_binary(d_)
+            values.append(d_)
         return values
 
     def key_value(
