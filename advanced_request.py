@@ -1,6 +1,7 @@
 """TcEx Framework Module"""
 
 # standard library
+import contextlib
 import json
 import logging
 from mimetypes import MimeTypes
@@ -58,10 +59,8 @@ class AdvancedRequest:
         self.data = self.model.tc_adv_req_body
         if self.data is not None:
             # INT-1386
-            try:
+            with contextlib.suppress(AttributeError):
                 self.data = self.data.encode('utf-8')  # type: ignore
-            except AttributeError:
-                pass  # Binary Data
 
         if self.model.tc_adv_req_urlencode_body:
             # the user has selected to urlencode the body, which indicates that
@@ -70,7 +69,7 @@ class AdvancedRequest:
             try:
                 self.data = json.loads(self.data)
             except ValueError:  # pragma: no cover
-                self.log.error('Failed loading body as JSON data.')
+                self.log.exception('Failed loading body as JSON data.')
 
     def configure_headers(self):
         """Configure Headers
@@ -132,7 +131,8 @@ class AdvancedRequest:
                 url=self.model.tc_adv_req_path,
             )
         except RequestException as ex:  # pragma: no cover
-            raise RuntimeError(f'Exception during request ({ex}).') from ex
+            ex_msg = f'Exception during request ({ex}).'
+            raise RuntimeError(ex_msg) from ex
 
         # write outputs as soon as they are available
         self.playbook.create.variable(
@@ -158,7 +158,8 @@ class AdvancedRequest:
         response_mb: float = response_bytes / 1000000
         self.log.info(f'Response MB: {response_mb}')
         if response_mb > self.max_mb:  # pragma: no cover
-            raise RuntimeError('Download was larger than maximum supported 500 MB.')
+            ex_msg = 'Download was larger than maximum supported 500 MB.'
+            raise RuntimeError(ex_msg)
 
         # write content after size validation
         self.playbook.create.variable(
@@ -170,6 +171,7 @@ class AdvancedRequest:
 
         # fail if fail_on_error is selected and not ok
         if self.model.tc_adv_req_fail_on_error and not response.ok:
-            raise RuntimeError(f'Failed for status ({response.status_code})')
+            ex_msg = f'Failed for status ({response.status_code})'
+            raise RuntimeError(ex_msg)
 
         return response

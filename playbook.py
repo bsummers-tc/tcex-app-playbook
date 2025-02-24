@@ -82,7 +82,8 @@ class Playbook:
     def create(self) -> PlaybookCreate:
         """Return instance of PlaybookCreate"""
         if self.context is None:
-            raise RuntimeError('Playbook context is required for PlaybookCreate.')
+            ex_msg = 'Playbook context is required for PlaybookCreate.'
+            raise RuntimeError(ex_msg)
 
         return PlaybookCreate(self.context, self.key_value_store, self.output_variables)
 
@@ -90,7 +91,8 @@ class Playbook:
     def delete(self) -> PlaybookDelete:
         """Return instance of PlaybookDelete"""
         if self.context is None:
-            raise RuntimeError('Playbook context is required for PlaybookDelete.')
+            ex_msg = 'Playbook context is required for PlaybookDelete.'
+            raise RuntimeError(ex_msg)
 
         return PlaybookDelete(self.context, self.key_value_store)
 
@@ -107,6 +109,7 @@ class Playbook:
     def read(self) -> PlaybookRead:
         """Return instance of PlaybookRead"""
         if self.context is None:
-            raise RuntimeError('Playbook context is required for PlaybookRead.')
+            ex_msg = 'Playbook context is required for PlaybookRead.'
+            raise RuntimeError(ex_msg)
 
         return PlaybookRead(self.context, self.key_value_store)

@@ -47,11 +47,14 @@ class PlaybookCreate:
           - is Iterable
         """
         if validate is True and (isinstance(value, dict | str) or not isinstance(value, Iterable)):
-            raise RuntimeError('Invalid data provided for KeyValueArray.')
+            ex_msg = 'Invalid data provided for KeyValueArray.'
+            raise RuntimeError(ex_msg)
 
     def _check_null(self, key: str, value: Any) -> bool:
         """Return True if key or value is null."""
         invalid = False
+
+        # this code should be unreachable, but just in case
         if key is None:
             self.log.warning('The provided key was None.')
             invalid = True
@@ -82,12 +85,11 @@ class PlaybookCreate:
     def _check_variable_type(self, variable: str, type_: str):
         """Validate the correct type was passed to the method."""
         if self.util.get_playbook_variable_type(variable).lower() != type_.lower():
-            raise RuntimeError(
-                f'Invalid variable provided ({variable}), variable must be of type {type_}.'
-            )
+            ex_msg = f'Invalid variable provided ({variable}), variable must be of type {type_}.'
+            raise RuntimeError(ex_msg)
 
     @staticmethod
-    def _coerce_string_value(value: bool | float | int | str) -> str:
+    def _coerce_string_value(value: bool | float | str) -> str:
         """Return a string value from an bool or int."""
         # coerce bool before int as python says a bool is an int
         if isinstance(value, bool):
@@ -105,8 +107,8 @@ class PlaybookCreate:
         self.log.debug(f'writing variable {key.strip()}')
         try:
             return self.key_value_store.client.create(self.context, key.strip(), value)
-        except RuntimeError as e:  # pragma: no cover
-            self.log.error(e)
+        except RuntimeError:  # pragma: no cover
+            self.log.exception('Error writing data to key value store.')
             return None
 
     def _get_variable(self, key: str, variable_type: str | None = None) -> str | None:
@@ -147,7 +149,8 @@ class PlaybookCreate:
         try:
             return json.dumps(value)
         except ValueError as ex:  # pragma: no cover
-            raise RuntimeError(f'Invalid data provided, failed to serialize value ({ex}).') from ex
+            ex_msg = f'Invalid data provided, failed to serialize value ({ex}).'
+            raise RuntimeError(ex_msg) from ex
 
     @staticmethod
     def _process_object_types(
@@ -161,7 +164,8 @@ class PlaybookCreate:
             types = (BaseModel, dict, type(None))
 
         if validate and not isinstance(value, types):
-            raise RuntimeError(f'Invalid type provided for object type ({type(value)}).')
+            ex_msg = f'Invalid type provided for object type ({type(value)}).'
+            raise RuntimeError(ex_msg)
 
         if isinstance(value, BaseModel):
             value = value.dict(exclude_unset=True)
@@ -186,9 +190,7 @@ class PlaybookCreate:
             return False
         if not isinstance(data.get('indicator', []), list):
             return False
-        if not isinstance(data.get('group', []), list):
-            return False
-        return True
+        return isinstance(data.get('group', []), list)
 
     @staticmethod
     def is_tc_entity(data: dict) -> bool:
@@ -248,7 +250,10 @@ class PlaybookCreate:
             'tcbatch': self.tc_batch,
         }
         return variable_type_map.get(variable_type, self.raw)(  # type: ignore
-            variable, value, validate, when_requested  # type: ignore
+            variable,
+            value,
+            validate,
+            when_requested,  # type: ignore
         )
 
     def binary(
@@ -277,7 +282,8 @@ class PlaybookCreate:
 
         # basic validation of value
         if validate and not isinstance(value, bytes):
-            raise RuntimeError('Invalid data provided for Binary.')
+            ex_msg = 'Invalid data provided for Binary.'
+            raise RuntimeError(ex_msg)
 
         # prepare value - playbook Binary fields are base64 encoded
         value_ = base64.b64encode(value).decode('utf-8')
@@ -312,11 +318,13 @@ class PlaybookCreate:
         # basic validation and prep of value
         value_encoded = []
         for v in value:
-            if v is not None:
-                if validate and not isinstance(v, bytes):
-                    raise RuntimeError('Invalid data provided for Binary.')
-                v = base64.b64encode(v).decode('utf-8')
-            value_encoded.append(v)
+            v_ = v
+            if v_ is not None:
+                if validate and not isinstance(v_, bytes):
+                    ex_msg = 'Invalid data provided for Binary.'
+                    raise RuntimeError(ex_msg)
+                v_ = base64.b64encode(v_).decode('utf-8')
+            value_encoded.append(v_)
         return self._create_data(variable, self._serialize_data(value_encoded))
 
     def key_value(
@@ -344,7 +352,8 @@ class PlaybookCreate:
         # basic validation and prep of value
         value = self._process_object_types(value, validate)
         if validate and not self.is_key_value(value):
-            raise RuntimeError('Invalid data provided for KeyValueArray.')
+            ex_msg = 'Invalid data provided for KeyValueArray.'
+            raise RuntimeError(ex_msg)
 
         return self._create_data(variable, self._serialize_data(value))
 
@@ -376,10 +385,11 @@ class PlaybookCreate:
         # basic validation and prep of value
         _value = []
         for v in value:
-            v = self._process_object_types(v, validate, allow_none=True)
-            if validate and not self.is_key_value(v):
-                raise RuntimeError('Invalid data provided for KeyValueArray.')
-            _value.append(v)
+            v_ = self._process_object_types(v, validate, allow_none=True)
+            if validate and not self.is_key_value(v_):
+                ex_msg = 'Invalid data provided for KeyValueArray.'
+                raise RuntimeError(ex_msg)
+            _value.append(v_)
         value = _value
 
         return self._create_data(variable, self._serialize_data(value))
@@ -387,7 +397,7 @@ class PlaybookCreate:
     def string(
         self,
         key: str,
-        value: bool | float | int | str,
+        value: bool | float | str,
         validate: bool = True,
         when_requested: bool = True,
     ) -> int | None:
@@ -411,7 +421,8 @@ class PlaybookCreate:
 
         # validation only needs to check str because value was coerced
         if validate and not isinstance(value, str):
-            raise RuntimeError(f'Invalid data provided for String ({value}).')
+            ex_msg = f'Invalid data provided for String ({value}).'
+            raise RuntimeError(ex_msg)
 
         return self._create_data(variable, self._serialize_data(value))
 
@@ -444,17 +455,17 @@ class PlaybookCreate:
         value_coerced = []
         for v in value:
             # coerce string values
-            v = self._coerce_string_value(v)
+            v_ = self._coerce_string_value(v)
 
             # validation only needs to check str because value was coerced
-            if validate and not isinstance(v, type(None) | str):
-                raise RuntimeError('Invalid data provided for StringArray.')
-            value_coerced.append(v)
+            if validate and not isinstance(v_, type(None) | str):
+                ex_msg = 'Invalid data provided for StringArray.'
+                raise RuntimeError(ex_msg)
+            value_coerced.append(v_)
         value = value_coerced
 
         return self._create_data(variable, self._serialize_data(value))
 
-    # pylint: disable=unused-argument
     def raw(
         self,
         key: str,
@@ -497,7 +508,8 @@ class PlaybookCreate:
         # basic validation
         value = self._process_object_types(value, validate)
         if validate and not self.is_tc_batch(value):
-            raise RuntimeError('Invalid data provided for TcBatch.')
+            ex_msg = 'Invalid data provided for TcBatch.'
+            raise RuntimeError(ex_msg)
 
         return self._create_data(variable, self._serialize_data(value))
 
@@ -526,7 +538,8 @@ class PlaybookCreate:
         # basic validation
         value = self._process_object_types(value, validate)
         if validate and not self.is_tc_entity(value):
-            raise RuntimeError('Invalid data provided for TcEntityArray.')
+            ex_msg = 'Invalid data provided for TcEntityArray.'
+            raise RuntimeError(ex_msg)
 
         return self._create_data(variable, self._serialize_data(value))
 
@@ -558,10 +571,11 @@ class PlaybookCreate:
         # basic validation and prep of value
         _value = []
         for v in value:
-            v = self._process_object_types(v, validate, allow_none=True)
-            if validate and not self.is_tc_entity(v):
-                raise RuntimeError('Invalid data provided for TcEntityArray.')
-            _value.append(v)
+            v_ = self._process_object_types(v, validate, allow_none=True)
+            if validate and not self.is_tc_entity(v_):
+                ex_msg = 'Invalid data provided for TcEntityArray.'
+                raise RuntimeError(ex_msg)
+            _value.append(v_)
         value = _value
 
         return self._create_data(variable, self._serialize_data(value))
