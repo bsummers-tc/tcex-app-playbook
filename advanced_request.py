@@ -65,7 +65,7 @@ class AdvancedRequest:
         if self.model.tc_adv_req_urlencode_body:
             # the user has selected to urlencode the body, which indicates that
             # the body is a JSON string and should be converted to a dict
-            self.data = cast(str, self.data)
+            self.data = cast('str', self.data)
             try:
                 self.data = json.loads(self.data)
             except ValueError:  # pragma: no cover
