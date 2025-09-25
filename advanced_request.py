@@ -125,7 +125,7 @@ class AdvancedRequest:
                 allow_redirects=self.allow_redirects,
                 data=self.data,
                 headers=self.headers,
-                method=self.model.tc_adv_req_http_method,
+                method=cast('str', self.model.tc_adv_req_http_method),
                 params=self.params,
                 timeout=self.timeout,
                 url=self.model.tc_adv_req_path,
