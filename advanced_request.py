@@ -1,13 +1,11 @@
 """TcEx Framework Module"""
 
-# standard library
 import contextlib
 import json
 import logging
 from mimetypes import MimeTypes
 from typing import cast
 
-# third-party
 from requests import Response, Session
 from requests.exceptions import RequestException
 

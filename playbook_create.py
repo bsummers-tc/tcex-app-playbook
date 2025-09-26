@@ -1,6 +1,5 @@
 """TcEx Framework Module"""
 
-# standard library
 import base64
 import json
 import logging
@@ -8,7 +7,6 @@ import os
 from collections.abc import Callable, Iterable
 from typing import Any
 
-# third-party
 from pydantic import BaseModel
 
 from ...app.key_value_store import KeyValueRedis
