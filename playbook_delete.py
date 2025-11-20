@@ -1,6 +1,5 @@
 """TcEx Framework Module"""
 
-# standard library
 import logging
 
 from ...app.key_value_store import KeyValueRedis

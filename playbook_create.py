@@ -1,6 +1,5 @@
 """TcEx Framework Module"""
 
-# standard library
 import base64
 import json
 import logging
@@ -8,7 +7,6 @@ import os
 from collections.abc import Callable, Iterable
 from typing import Any
 
-# third-party
 from pydantic import BaseModel
 
 from ...app.key_value_store import KeyValueRedis
@@ -168,7 +166,13 @@ class PlaybookCreate:
             raise RuntimeError(ex_msg)
 
         if isinstance(value, BaseModel):
-            value = value.dict(exclude_unset=True)
+            # Support both Pydantic v1 and v2
+            if hasattr(value, 'model_dump'):
+                # Pydantic v2
+                value = value.model_dump(exclude_unset=True)  # type: ignore
+            else:
+                # Pydantic v1
+                value = value.dict(exclude_unset=True)
 
         return value
 

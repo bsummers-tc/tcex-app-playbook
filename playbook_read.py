@@ -1,6 +1,5 @@
 """TcEx Framework Module"""
 
-# standard library
 import base64
 import json
 import logging

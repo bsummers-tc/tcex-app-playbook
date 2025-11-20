@@ -1,13 +1,11 @@
 """TcEx Framework Module"""
 
-# standard library
 import contextlib
 import json
 import logging
 from mimetypes import MimeTypes
 from typing import cast
 
-# third-party
 from requests import Response, Session
 from requests.exceptions import RequestException
 
@@ -125,7 +123,7 @@ class AdvancedRequest:
                 allow_redirects=self.allow_redirects,
                 data=self.data,
                 headers=self.headers,
-                method=self.model.tc_adv_req_http_method,
+                method=cast('str', self.model.tc_adv_req_http_method),
                 params=self.params,
                 timeout=self.timeout,
                 url=self.model.tc_adv_req_path,
