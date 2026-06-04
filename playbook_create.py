@@ -174,7 +174,7 @@ class PlaybookCreate:
                 # Pydantic v1
                 value = value.dict(exclude_unset=True)
 
-        # due to the need to support pydantic v1 and v2, pyright cannot determine
+        # due to the need to support pydantic v1 and v2, the type checker cannot determine
         # that value is a dict at this point.
         return value
 
