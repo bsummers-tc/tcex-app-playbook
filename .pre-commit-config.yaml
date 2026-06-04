@@ -57,11 +57,3 @@ repos:
         types_or:
           - python
           - pyi
-  - repo: local
-    hooks:
-      - id: pyright
-        entry: pyright
-        language: system
-        name: pyright
-        types:
-          - python

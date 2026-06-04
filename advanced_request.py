@@ -58,7 +58,7 @@ class AdvancedRequest:
         if self.data is not None:
             # INT-1386
             with contextlib.suppress(AttributeError):
-                self.data = self.data.encode('utf-8')  # type: ignore
+                self.data = self.data.encode('utf-8')
 
         if self.model.tc_adv_req_urlencode_body:
             # the user has selected to urlencode the body, which indicates that

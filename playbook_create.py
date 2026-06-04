@@ -39,14 +39,14 @@ class PlaybookCreate:
     def _is_array_like_iterable(value: dict | Iterable | str) -> bool:
         """Determine if value is an array-like iterable.
 
-        Primarily: deterine if a value is an iterable that is appropriate for Array-type outputs.
+        Primarily: determine if a value is an iterable that is appropriate for Array-type outputs.
 
         Validation:
           - not a dict (dicts are iterable)
           - not a string (strings are iterable)
           - is Iterable
         """
-        return not isinstance(value, dict | str) and  isinstance(value, Iterable)
+        return not isinstance(value, dict | str) and isinstance(value, Iterable)
 
     def _check_null(self, key: str, value: Any) -> bool:
         """Return True if key or value is null."""
@@ -176,7 +176,7 @@ class PlaybookCreate:
 
         # due to the need to support pydantic v1 and v2, pyright cannot determine
         # that value is a dict at this point.
-        return value  # type: ignore
+        return value
 
     @staticmethod
     def is_key_value(data: dict) -> bool:
@@ -255,11 +255,11 @@ class PlaybookCreate:
             'tcentityarray': self.tc_entity_array,
             'tcbatch': self.tc_batch,
         }
-        return variable_type_map.get(variable_type, self.raw)(  # type: ignore
+        return variable_type_map.get(variable_type, self.raw)(
             variable,
             value,
             validate,
-            when_requested,  # type: ignore
+            when_requested,
         )
 
     def binary(
@@ -311,7 +311,6 @@ class PlaybookCreate:
         if validate and not self._is_array_like_iterable(value):
             ex_msg = 'Invalid data provided for BinaryArray.'
             raise RuntimeError(ex_msg)
-
 
         # convert key to variable if required
         variable = self._get_variable(key, 'BinaryArray')
@@ -381,7 +380,7 @@ class PlaybookCreate:
         if validate and not self._is_array_like_iterable(value):
             ex_msg = 'Invalid data provided for KeyValueArray.'
             raise RuntimeError(ex_msg)
-        
+
         # convert key to variable if required
         variable = self._get_variable(key, 'KeyValueArray')
         if variable is None:
@@ -394,7 +393,7 @@ class PlaybookCreate:
         self._check_variable_type(variable, 'KeyValueArray')
 
         # basic validation and prep of value
-        _value = []
+        _value: list[Any] = []
         for v in value:
             v_ = self._process_object_types(v, validate, allow_none=True)
             if validate and not self.is_key_value(v_):
@@ -452,7 +451,7 @@ class PlaybookCreate:
         if validate and not self._is_array_like_iterable(value):
             ex_msg = 'Invalid data provided for StringArray.'
             raise RuntimeError(ex_msg)
-        
+
         # convert key to variable if required
         variable = self._get_variable(key, 'StringArray')
         if variable is None:
@@ -465,7 +464,7 @@ class PlaybookCreate:
         self._check_variable_type(variable, 'StringArray')
 
         # basic validation and prep of value
-        value_coerced = []
+        value_coerced: list[Any] = []
         for v in value:
             # coerce string values
             v_ = self._coerce_string_value(v)
@@ -571,7 +570,7 @@ class PlaybookCreate:
         if validate and not self._is_array_like_iterable(value):
             ex_msg = 'Invalid data provided for TCEntityArray.'
             raise RuntimeError(ex_msg)
-        
+
         # convert key to variable if required
         variable = self._get_variable(key, 'TCEntityArray')
         if variable is None:
@@ -584,7 +583,7 @@ class PlaybookCreate:
         self._check_variable_type(variable, 'TCEntityArray')
 
         # basic validation and prep of value
-        _value = []
+        _value: list[Any] = []
         for v in value:
             v_ = self._process_object_types(v, validate, allow_none=True)
             if validate and not self.is_tc_entity(v_):

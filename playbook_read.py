@@ -288,7 +288,7 @@ class PlaybookRead:
             'tcentityarray': self.tc_entity_array,
             # 'tcenhancedentity': self.tc_entity,
         }
-        value = variable_type_map.get(variable_type, self.raw)(key)
+        value: Any = variable_type_map.get(variable_type, self.raw)(key)
 
         if value is not None:
             if variable_type == 'binary':
@@ -453,7 +453,7 @@ class PlaybookRead:
         # Array type is serialized before writing to redis, deserialize the data
         _data: list[dict] = self._deserialize_data(data)
 
-        values = []
+        values: list[Any] = []
         for d in _data:
             # d should be a base64 encoded string
             values.append(self._process_key_value(d, resolve_embedded=resolve_embedded))
