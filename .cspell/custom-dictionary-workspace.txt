@@ -1,7 +1,0 @@
-# Custom Dictionary Words
-binaryarray
-hset
-keyvaluearray
-maxsplit
-stringarray
-tcbatch
